@@ -1,0 +1,36 @@
+# config.yaml
+model:
+  time_steps: 30
+  dropout_rate: 0.7
+  l2_reg: 0.01
+  num_heads: 6
+  use_bidirectional: true
+  use_residual: true
+  batch_size: 32
+  
+training:
+  epochs: 150
+  learning_rate: 0.001
+  patience: 15
+  weight_decay: 0.001
+  scheduler_type: "cosine_warmup"
+  warmup_epochs: 10
+  gradient_clip: 0.5
+  
+data:
+  scaler_type: "standard"
+  train_split: 0.7
+  val_split: 0.1
+  
+optimization:
+  do_optimization: true
+  n_trials: 100
+  
+features:
+  use_wavelet_denoise: true
+  
+execution:
+  do_cross_validation: true
+  use_optimized_params: true
+  n_folds: 5
+  fold_size: 0.15

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# 数据文件
+*.csv
+*.xlsx
+*.db
+*.sqlite
+
+# 图片（可选）
+# *.png
+# *.jpg
+
+# 日志
+*.log
+
+# 临时文件
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 打包文件
+dist/
+build/
+bin/
+.buildozer/
+
+# 其他
+.env
+*.bak
