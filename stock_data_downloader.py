@@ -3,10 +3,59 @@
 负责从efinance获取股票数据，包括K线、资金流等信息
 """
 
-import efinance as ef
+import os
+import sys
 import pandas as pd
 import numpy as np
-import sys
+import tempfile
+from pathlib import Path
+
+# 修复Streamlit Cloud权限问题：在导入efinance前修补其配置
+# Streamlit Cloud文件系统大部分是只读的
+EFINANCE_AVAILABLE = False
+ef = None
+
+try:
+    # 检测Streamlit Cloud环境
+    is_streamlit_cloud = os.path.exists('/mount/src')
+    
+    if is_streamlit_cloud:
+        print("[Streamlit Cloud] 检测到云环境，正在修补efinance配置...")
+        
+        # 方法1: 使用临时目录
+        temp_dir = tempfile.gettempdir()
+        cache_dir = os.path.join(temp_dir, 'efinance_cache')
+        
+        # 方法2: 修补efinance的配置模块
+        import importlib.util
+        import types
+        
+        # 在导入efinance前，预先创建mock配置
+        mock_config = types.ModuleType('efinance.config')
+        mock_config.DATA_DIR = Path(cache_dir)
+        mock_config.SEARCH_RESULT_CACHE_PATH = Path(cache_dir) / 'search_cache.json'
+        mock_config.MAX_CONNECTIONS = 5
+        
+        # 确保缓存目录存在
+        os.makedirs(cache_dir, exist_ok=True)
+        
+        # 注入mock配置
+        sys.modules['efinance.config'] = mock_config
+        
+        print(f"[OK] efinance缓存目录设置为: {cache_dir}")
+    
+    # 现在导入efinance
+    import efinance as ef
+    EFINANCE_AVAILABLE = True
+    print("[OK] efinance导入成功")
+    
+except Exception as e:
+    print(f"[WARNING] efinance导入失败: {e}")
+    print("[INFO] 应用将在离线模式下运行")
+    print("[TIP] 在本地环境训练模型并上传到GitHub")
+    EFINANCE_AVAILABLE = False
+    ef = None
+
 sys.path.append('.')
 from utils.technical_indicators import add_technical_indicators
 
@@ -25,6 +74,18 @@ def get_billboard_stocks(start_date='20240101', end_date='20240930', min_frequen
     print(f"正在获取龙虎榜数据...")
     print(f"时间范围: {start_date} - {end_date}")
     print(f"最小上榜次数: {min_frequency}")
+    
+    # 检查efinance是否可用
+    if not EFINANCE_AVAILABLE or ef is None:
+        print("⚠️ efinance不可用，使用默认股票列表")
+        return [
+            '600519',  # 贵州茅台
+            '000001',  # 平安银行
+            '000002',  # 万科A
+            '600036',  # 招商银行
+            '000858',  # 五粮液
+            '002415',  # 海康威视
+        ]
     
     try:
         # 获取龙虎榜数据
@@ -158,6 +219,12 @@ def download_china_stock_enhanced_data(stock_codes, start_date='20240101', end_d
     返回:
     all_data: 字典，键为股票代码，值为DataFrame
     """
+    # 检查efinance是否可用
+    if not EFINANCE_AVAILABLE or ef is None:
+        print("❌ efinance不可用，无法下载股票数据")
+        print("⚠️ 请在本地环境下载数据后上传，或使用离线模式")
+        return {}
+    
     print(f"正在下载 {len(stock_codes)} 只中国股票的增强数据...")
     print(f"股票代码: {stock_codes}")
     print(f"时间范围: {start_date} - {end_date}")

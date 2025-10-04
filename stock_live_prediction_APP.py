@@ -17,7 +17,18 @@ sys.path.append('.')
 warnings.filterwarnings('ignore')
 
 # 导入数据下载模块
-from stock_data_downloader import download_china_stock_enhanced_data
+try:
+    from stock_data_downloader import download_china_stock_enhanced_data, EFINANCE_AVAILABLE
+    print("[OK] 数据下载模块导入成功")
+except ImportError as e:
+    print(f"[WARNING] 数据下载模块导入失败: {e}")
+    EFINANCE_AVAILABLE = False
+    
+    # 创建一个替代函数
+    def download_china_stock_enhanced_data(*args, **kwargs):
+        print("[ERROR] 数据下载功能不可用")
+        print("[TIP] 请在本地环境下载数据或使用预训练模型")
+        return {}
 
 def load_trained_model(model_path='models/trained_model.pkl'):
     """
