@@ -14,8 +14,8 @@ ENV/
 .idea/
 *.swp
 
-# 数据文件
-*.csv
+# 数据文件 (如果需要上传CSV，请注释掉下面这行)
+# *.csv
 *.xlsx
 *.db
 *.sqlite
